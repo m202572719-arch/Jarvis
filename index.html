@@ -2,20 +2,25 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>JARVIS MARK VIII - HOLO-TERMINAL</title>
+    <title>JARVIS MARK IX - THINKING MATRIX</title>
     <style>
         body { background-color: #01040a; margin: 0; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; color: #00d2ff; user-select: none; }
         #canvas-zone { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
-        #webcam { position: absolute; top: 40px; right: 40px; width: 260px; height: 195px; z-index: 20; border: 2px solid rgba(0, 210, 255, 0.4); transform: scaleX(-1); border-radius: 12px; filter: grayscale(80%) contrast(120%) drop-shadow(0 0 20px rgba(0,210,255,0.3)); }
+        #webcam { position: absolute; top: 40px; right: 40px; width: 240px; height: 180px; z-index: 20; border: 2px solid rgba(0, 210, 255, 0.4); transform: scaleX(-1); border-radius: 12px; filter: grayscale(100%) contrast(110%) sepia(30%) hue-rotate(150deg); }
+        
         .hud-overlay { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; pointer-events: none; }
         #sys-status { position: absolute; top: 40px; left: 40px; font-size: 28px; font-weight: bold; letter-spacing: 3px; text-shadow: 0 0 15px #00d2ff; }
         #gesture-status { position: absolute; top: 85px; left: 40px; font-size: 18px; color: #ffaa00; text-shadow: 0 0 8px #ffaa00; font-weight: bold; }
-        #network-logger { position: absolute; top: 120px; left: 40px; font-size: 15px; color: #ff0055; font-weight: bold; display: none; text-shadow: 0 0 10px #ff0055; }
-        #subtitle-box { position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%); width: 80%; text-align: center; font-size: 24px; color: #ffffff; text-shadow: 0 0 15px #00d2ff; font-weight: 600; line-height: 1.6; }
-        #panel { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.3); padding: 15px 40px; border-radius: 10px; font-size: 15px; text-align: center; backdrop-filter: blur(5px); }
+        
+        /* 🌟 电影级：贾维斯专属深度思维计算流 HUD 视窗 */
+        #thinking-matrix { position: absolute; top: 135px; left: 40px; width: 420px; height: 350px; background: rgba(0, 210, 255, 0.02); border-left: 3px solid #00d2ff; padding: 15px; font-size: 14px; font-family: 'Courier New', monospace; color: #00ffcc; overflow-y: auto; pointer-events: auto; line-height: 1.6; box-sizing: border-box; text-shadow: 0 0 4px rgba(0,255,204,0.5); }
+        #thinking-matrix::-webkit-scrollbar { width: 4px; }
+        #thinking-matrix::-webkit-scrollbar-thumb { background: rgba(0, 210, 255, 0.3); }
+        
+        #subtitle-box { position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%); width: 75%; text-align: center; font-size: 24px; color: #ffffff; text-shadow: 0 0 15px #00d2ff; font-weight: 600; line-height: 1.6; }
+        #panel { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0, 210, 255, 0.03); border: 1px solid rgba(0, 210, 255, 0.2); padding: 15px 40px; border-radius: 10px; font-size: 15px; text-align: center; backdrop-filter: blur(6px); }
         #start-shield { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: #01040a; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
-        .btn { padding: 25px 50px; border: 2px solid #00d2ff; background: rgba(0, 210, 255, 0.1); color: #00d2ff; font-size: 22px; font-weight: bold; letter-spacing: 3px; box-shadow: 0 0 40px rgba(0, 210, 255, 0.4); border-radius: 6px; transition: 0.3s; }
-        .btn:hover { background: rgba(0, 210, 255, 0.3); box-shadow: 0 0 60px #00d2ff; }
+        .btn { padding: 25px 50px; border: 2px solid #00d2ff; background: rgba(0, 210, 255, 0.1); color: #00d2ff; font-size: 22px; font-weight: bold; letter-spacing: 3px; box-shadow: 0 0 40px rgba(0, 210, 255, 0.4); border-radius: 6px; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -23,44 +28,43 @@
 </head>
 <body>
 
-    <div id="start-shield" onclick="bootMarkVIII()">
-        <div class="btn">授权载入 MARK VIII 并网阵列</div>
+    <div id="start-shield" onclick="bootMarkIX()">
+        <div class="btn">初始化 MARK IX 思维矩阵舱</div>
     </div>
 
     <div id="canvas-zone"></div>
     <video id="webcam" autoplay playsinline></video>
 
     <div class="hud-overlay">
-        <div id="sys-status">JARVIS MARK VIII: OFFLINE</div>
-        <div id="gesture-status">SPATIAL SENSOR: OFFLINE</div>
-        <div id="network-logger"></div>
+        <div id="sys-status">JARVIS MARK IX: OFFLINE</div>
+        <div id="gesture-status">SPATIAL RADAR: OFFLINE</div>
+        <div id="thinking-matrix">💡 SYSTEM STATUS: READY<br>等待激活中枢网络...</div>
         <div id="subtitle-box"></div>
         <div id="panel">
-            <b>【Mark VIII 双手全息控制协议】</b> F11 全屏<br>
-            伸出两只手：双手拉开/拉近 = 解析放大/缩小视角 | 双手捏合 = 锁定抓取并平移全息视角
+            🧬 <b>DeepSeek-R1 深度思维流已载入</b> | 随时开口说话，支持强行打断交互 | 键盘 <b>F11</b> 全屏幕<br>
+            ✋ <b>双手地图解析手势</b>：伸出双手：拉开=向前推进透视全息模型 | 靠近=后退 | 双手捏合=拖拽平移视角
         </div>
     </div>
 
     <script>
-        // 🚨 极其重要：在这里替换你的密钥！保留引号！不要发在这个对话框里！
+        // 🔑 确保此处填入的是全新生成的有效密钥！
         const DEEPSEEK_API_KEY = "sk-joikwvbzzgcfhbdyiwnrkiwkvxgisedoirvstkqsysdzsfiw";
         const TAVILY_API_KEY = "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"; 
         
-        const MODEL_ID = "deepseek-ai/DeepSeek-V3";
-        let messages = [{"role": "system", "content": "你是贾维斯(JARVIS)，极度聪明的AI助理。称呼用户为“先生(Sir)”。严格要求：回答极度精炼口语化，像人类对话，不要超过三句话，严禁出现Markdown和长篇大论。当检索到数据时，直接陈述结论，假装这就是你知道的情报。"}];
+        // 🌟 切换为最高规格的推理大模型：DeepSeek-R1
+        const MODEL_ID = "deepseek-ai/DeepSeek-R1";
+        let messages = [{"role": "system", "content": "你是贾维斯(JARVIS)，托尼·斯塔克的全能AI管家。必须称呼用户为“先生(Sir)”。说话语气高智商、冷静、优雅且绝对忠诚。请保持精炼，严禁输出任何Markdown符号。回答前请在内心深处进行长考。"}];
 
-        // --- 全息 3D 渲染核心 (Mark VIII 空间控制增强版) ---
         let scene, camera, renderer, particleSystem;
         let animationStatus = "IDLE"; 
         let waveClock = 0;
-        let originalCameraPosition = new THREE.Vector3(0, 0, 240); // 记录摄像机原始位置
+        let originalCameraPosition = new THREE.Vector3(0, 0, 240); 
         let isTaskLock = false;
+        let midpointX_last = 0.5, midpointY_last = 0.5;
 
-        function init3DEngine() {
+        function init3DMatrix() {
             const zone = document.getElementById('canvas-zone');
             scene = new THREE.Scene();
-            
-            // 🌟 摄像机属性初始化：我们需要它能够进行高频解析和视角控制
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
             camera.position.copy(originalCameraPosition);
             
@@ -69,11 +73,11 @@
             zone.appendChild(renderer.domElement);
 
             const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(4500 * 3); // 粒子浓度增加到4500个，提升解析度
+            const positions = new Float32Array(4500 * 3); 
             for (let i = 0; i < 4500; i++) {
                 const theta = Math.random() * 2.0 * Math.PI;
                 const phi = Math.acos(2.0 * Math.random() - 1.0);
-                const r = 95 + Math.random() * 8;
+                const r = 95 + Math.random() * 6;
                 positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
                 positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
                 positions[i * 3 + 2] = r * Math.cos(phi);
@@ -109,63 +113,50 @@
             renderer.render(scene, camera);
         }
 
-        // --- Mark VIII 空间感知交互系统（控制摄像机实现电影级缩放/平移） ---
-        async function bootMarkVIII() {
+        // --- Mark IX 空间感知控制（双手操纵透视与视线平移） ---
+        async function bootMarkIX() {
             document.getElementById('start-shield').style.display = 'none';
-            init3DEngine();
+            init3DMatrix();
             
-            // 🌟 终极暴力防哑巴协议：在点击瞬间强制注入隐形音频，彻底冲破 Chrome 哑巴锁！
-            let forceVoiceChannel = new SpeechSynthesisUtterance("");
-            forceVoiceChannel.volume = 0;
-            window.speechSynthesis.speak(forceVoiceChannel);
+            // 🌟 杀招一：激活瞬间强制注入隐形音频，彻底强行轰开 Chrome 硬件锁
+            let initAudioLock = new SpeechSynthesisUtterance("");
+            window.speechSynthesis.speak(initAudioLock);
 
             const videoElement = document.getElementById('webcam');
             const gestureLabel = document.getElementById('gesture-status');
             const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
-            
-            // 🌟 核心升级：双手捕捉 maxNumHands: 2
             hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.7 });
 
             hands.onResults((results) => {
                 if (results.multiHandLandmarks && results.multiHandLandmarks.length === 2) {
-                    // 🌟 1. 双手模式：电影里一样的双手全息空间控制！
-                    const hand1 = results.multiHandLandmarks[0][9]; // 左手中心
-                    const hand2 = results.multiHandLandmarks[1][9]; // 右手中心
-                    // 计算双手在 2D 空间的欧氏距离
+                    const hand1 = results.multiHandLandmarks[0][9];
+                    const hand2 = results.multiHandLandmarks[1][9];
                     const dist2D = Math.sqrt(Math.pow(hand1.x - hand2.x, 2) + Math.pow(hand1.y - hand2.y, 2));
-                    
-                    // 计算双手的中心点，用于视角平移
                     const midpointX = (hand1.x + hand2.x) / 2;
                     const midpointY = (hand1.y + hand2.y) / 2;
 
-                    // 判断双手是否都在做“捏合”暗号
                     const hand1Pinch = Math.sqrt(Math.pow(results.multiHandLandmarks[0][4].x - results.multiHandLandmarks[0][8].x, 2) + Math.pow(results.multiHandLandmarks[0][4].y - results.multiHandLandmarks[0][8].y, 2)) < 0.05;
                     const hand2Pinch = Math.sqrt(Math.pow(results.multiHandLandmarks[1][4].x - results.multiHandLandmarks[1][8].x, 2) + Math.pow(results.multiHandLandmarks[1][4].y - results.multiHandLandmarks[1][8].y, 2)) < 0.05;
 
                     if (hand1Pinch && hand2Pinch) {
-                        // 🌟 交互状态 A：双手捏合 -> “选取并平移视角”（在地图或工程图纸中移位）
-                        gestureLabel.innerText = "MARK VIII: HOLO-PANNING (双手空间平移模式)";
+                        // ✋ 场景 A：双手捏合 -> 电影级“锁定拖拽地图平移”
+                        gestureLabel.innerText = "MARK IX: HOLO-PANNING (双手空间视窗移动)";
                         particleSystem.material.color.setHex(0x00ffcc);
-                        // 摄像机平滑映射双手中心点坐标
-                        camera.position.x += ((0.5 - midpointX) * 200 - camera.position.x) * 0.15;
-                        camera.position.y += ((0.5 - midpointY) * -180 - camera.position.y) * 0.15;
+                        camera.position.x += ((0.5 - midpointX) * 240 - camera.position.x) * 0.15;
+                        camera.position.y += ((0.5 - midpointY) * -200 - camera.position.y) * 0.15;
                     } else {
-                        // 🌟 交互状态 B：双手拉伸/聚拢 -> “视角解析放大/缩小”
-                        gestureLabel.innerText = "MARK VIII: DUAL-HAND ZOOM (双手空间解析模式)";
+                        // ✋ 场景 B：双手拉伸 -> 电影级“透视推近放大/拉远”
+                        gestureLabel.innerText = "MARK IX: SPATIAL ZOOM (双手多维空间透视中)";
                         particleSystem.material.color.setHex(0xffaa00);
-                        // 将距离映射为摄像机的 Z 轴视角平滑移动 (推进或后退)
-                        const targetZ = originalCameraPosition.z - (dist2D * 300 - 50);
-                        camera.position.z += (Math.max(50, targetZ) - camera.position.z) * 0.1;
+                        const targetZ = originalCameraPosition.z - (dist2D * 350 - 60);
+                        camera.position.z += (Math.max(40, targetZ) - camera.position.z) * 0.1;
                     }
                 } else if (results.multiHandLandmarks && results.multiHandLandmarks.length === 1) {
-                    // 🌟 2. 单手模式：捏合截图抓取
                     const lm = results.multiHandLandmarks[0];
                     const pinchDist = Math.sqrt(Math.pow(lm[4].x - lm[8].x, 2) + Math.pow(lm[4].y - lm[8].y, 2));
-                    
                     if (pinchDist < 0.05) {
-                        gestureLabel.innerText = "SPATIAL SENSOR: PINCH TO CAPTURE (执行空气抓取)";
+                        gestureLabel.innerText = "SPATIAL SENSOR: SNAPSHOT (空气抓取数据)";
                         particleSystem.material.color.setHex(0x00ffcc);
-                        camera.position.z += (100 - camera.position.z) * 0.1; // 单手抓取时视角强行拉进
                         if(!isTaskLock) {
                             isTaskLock = true;
                             setTimeout(() => {
@@ -173,121 +164,145 @@
                             }, 400);
                         }
                     } else {
-                        gestureLabel.innerText = "SPATIAL SENSOR: TRACKING (单手阵列锁定)";
+                        gestureLabel.innerText = "SPATIAL SENSOR: TRACKING (单手追踪)";
                         isTaskLock = false;
-                        camera.position.copy(originalCameraPosition); // 单手常态，视角归位
                     }
                 } else {
-                    gestureLabel.innerText = "SPATIAL SENSOR: SCANNING... (等待手势接入)";
+                    gestureLabel.innerText = "SPATIAL SENSOR: SCANNING...";
                     particleSystem.material.color.setHex(0x00d2ff);
-                    camera.position.lerp(originalCameraPosition, 0.1); // 手移开屏幕，视角平滑归位中心
+                    camera.position.lerp(originalCameraPosition, 0.1); 
                 }
             });
             const cameraHelper = new Camera(videoElement, { onFrame: async () => { await hands.send({ image: videoElement }); }, width: 640, height: 480 });
             cameraHelper.start();
 
-            initInterruptibleBrainAndVoice();
+            initFullDuplexBrain();
         }
 
-        // --- 实时联网嗅探大模型大脑 ---
+        // --- 实时联网嗅探 ---
         async function performLiveWebSearch(query) {
+            const matrix = document.getElementById('thinking-matrix');
+            matrix.innerHTML = `[NET_SCANNING] 🛰️ 正在攻破广域网端口...<br>[INFO] 嗅探关键词: "${query}"`;
             try {
                 const response = await fetch('https://api.tavily.com/search', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ api_key: TAVILY_API_KEY, query: query, search_depth: "basic", include_answer: true, max_results: 3 })
                 });
                 const data = await response.json();
-                let context = `【系统全网实时抓取数据】\n直接答案：${data.answer || '无直接答案'}\n来源摘要：\n`;
+                matrix.innerHTML += `<br><span style="color:#00ff00">[SUCCESS] 网络情报回传成功。送往推理矩阵。</span><br>`;
+                let context = `【系统全网实时数据】\n直接结论：${data.answer || '暂无'}\n来源摘要：\n`;
                 data.results.forEach(res => { context += `- ${res.title}: ${res.content}\n`; });
                 return context;
             } catch (error) { return null; }
         }
 
-        // --- 全双工无死锁打断中枢 ---
-        function initInterruptibleBrainAndVoice() {
+        // --- 🌟 终极：全双工神经网络打断与 R1 思维流解析 ---
+        function initFullDuplexBrain() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
             recognition.lang = 'zh-CN';
-            recognition.continuous = true;  // 🌟 核心：全双工全天候监听，实现即时插嘴打断
+            recognition.continuous = true;  
             recognition.interimResults = false;
 
             recognition.onresult = async (event) => {
                 const text = event.results[event.results.length - 1][0].transcript;
                 if (!text.trim()) return;
 
-                // 🌟 小爱同学级核心打断：你一说话，立马强行停止网页语音合成引擎！
+                // 🌟 小爱同学级瞬间打断：开口即静音，清空过载
                 if(window.speechSynthesis.speaking) {
-                    window.speechSynthesis.cancel(); 
-                    console.log("已打断施法，重新侦听。");
+                    window.speechSynthesis.cancel();
+                    console.log("CRITICAL: 施法已被先生中途打断。");
                 }
 
                 document.getElementById('subtitle-box').innerText = "Sir: " + text;
+                const matrix = document.getElementById('thinking-matrix');
+                matrix.innerHTML = `[JARVIS CENTRAL BRAIN] 🧠 收到指令。启动长考机制...<br>`;
+                
                 let finalPrompt = text;
-
-                if (text.includes("查") || text.includes("最新") || text.includes("今天") || text.includes("谁是") || text.includes("新闻")) {
+                if (text.includes("查") || text.includes("最新") || text.includes("今天") || text.includes("预测") || text.includes("新闻")) {
                     animationStatus = "SEARCHING";
-                    document.getElementById('sys-status').innerText = "JARVIS PROTOCOL: BROWSING (嗅探全网节点...)";
+                    document.getElementById('sys-status').innerText = "JARVIS PROTOCOL: SCANNING GLOBAL NET...";
                     const webContext = await performLiveWebSearch(text);
-                    if (webContext) finalPrompt = `${webContext}\n\n先生的问题是：${text}\n请根据上述情报回复。不要提你是根据文本回答，直接汇报结论。`;
+                    if (webContext) finalPrompt = `${webContext}\n\n先生的问题是：${text}\n请基于上述全网情报向先生作答。不要带有Markdown。`;
                 }
 
                 animationStatus = "THINKING";
-                document.getElementById('sys-status').innerText = "JARVIS PROTOCOL: THINKING (量子算力运算中...)";
+                document.getElementById('sys-status').innerText = "JARVIS PROTOCOL: COGNITIVE THINKING...";
 
                 messages.push({"role": "user", "content": finalPrompt});
                 try {
                     const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
                         method: 'POST', headers: { 'Authorization': `Bearer ${DEEPSEEK_API_KEY}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ model: MODEL_ID, messages: messages, temperature: 0.4 })
+                        body: JSON.stringify({ model: MODEL_ID, messages: messages, temperature: 0.6 })
                     });
+                    
                     const data = await response.json();
-                    const jarvisReply = data.choices[0].message.content;
+                    const rawReply = data.choices[0].message.content;
+                    
+                    // 🌟 核心硬核魔改：解算 DeepSeek-R1 专属的思维链模型
+                    let thinkPart = "解算完毕。";
+                    let finalReply = rawReply;
+                    
+                    if (rawReply.includes("<think>")) {
+                        let segments = rawReply.split("</think>");
+                        thinkPart = segments[0].replace("<think>", "").trim();
+                        finalReply = segments[1] ? segments[1].trim() : "长考异常。";
+                    }
+                    
+                    // 动态流式打入左侧科幻计算栏
+                    matrix.innerHTML = `<span style="color:#00ff00">[思维计算完毕] 维度解算过程：</span><br>${thinkPart}`;
+                    matrix.scrollTop = matrix.scrollHeight; // 滚动条置底
+
                     messages.pop(); 
                     messages.push({"role": "user", "content": text});
-                    messages.push({"role": "assistant", "content": jarvisReply});
+                    messages.push({"role": "assistant", "content": finalReply});
                     
-                    jarvisSpeak(jarvisReply);
-                } catch(e) { jarvisSpeak("链路中断，先生。您的余额是否充足？"); }
+                    jarvisSpeak(finalReply);
+                } catch(e) { jarvisSpeak("云端算力过载，先生。请确认云端燃料储备。"); }
             };
 
             recognition.onend = () => { setTimeout(() => { recognition.start(); }, 100); };
             recognition.start();
-            document.getElementById('sys-status').innerText = "JARVIS PROTOCOL: LISTENING (随时聆听口令...)";
+            document.getElementById('sys-status').innerText = "JARVIS PROTOCOL: LISTENING...";
             animationStatus = "LISTENING";
             
-            // 延迟开场请安，确保声音通道已彻底暴力解锁并拉起
             setTimeout(() => {
-                jarvisSpeak("全屏双手全息空间协议已合闸，全双工语音协议已上线。请吩咐，先生。");
-            }, 1000);
+                jarvisSpeak("双手全息空间控制协议已合闸。思维计算矩阵已并网。随时可以打断我，先生。");
+            }, 1200);
         }
 
-        // --- 强制匹配高清中文原声库 ---
+        // --- 🌟 强制发声抗死锁机制 ---
         function jarvisSpeak(text) {
             document.getElementById('sys-status').innerText = "JARVIS PROTOCOL: SPEAKING";
             document.getElementById('subtitle-box').innerText = "JARVIS: " + text;
             animationStatus = "SPEAKING";
 
-            window.speechSynthesis.cancel();
+            window.speechSynthesis.cancel(); // 暴力清空堆栈
             
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'zh-CN'; 
+            // 🌟 杀招二：将 Utterance 挂载至 Window 全局变量，彻底摧毁浏览器静音垃圾回收机制
+            window.currentUtterance = new SpeechSynthesisUtterance(text);
+            window.currentUtterance.lang = 'zh-CN'; 
             
-            // 🌟 强行强制匹配系统中最好听的中文原声 (Edge/Chrome 兼容)
+            // 🌟 杀招三：强行过滤并拉取 Windows 系统 100% 具备的本地微软离线语音包，决不走 Google 线上
             const voices = window.speechSynthesis.getVoices();
-            const preferredVoice = voices.find(v => v.lang.includes('zh') && (v.name.includes('Google') || v.name.includes('Xiaoxiao') || v.name.includes('Yunxi')));
-            if(preferredVoice) utterance.voice = preferredVoice;
+            const preferredVoice = voices.find(v => v.lang.includes('zh') && (v.name.includes('Microsoft') || v.name.includes('Huihui') || v.name.includes('Kangkang')));
+            if(preferredVoice) window.currentUtterance.voice = preferredVoice;
             
-            utterance.rate = 1.05; // 略微果断的速度
-            utterance.pitch = 0.92; // 略微稳重的电磁质感
+            window.currentUtterance.rate = 1.05; 
+            window.currentUtterance.pitch = 0.95; 
             
-            utterance.onend = () => {
-                document.getElementById('sys-status').innerText = "JARVIS PROTOCOL: LISTENING (待命...)";
-                animationStatus = "IDLE";
-                // 播报完毕，重置球体材质颜色和视角，为主权交还麦克风做准备
+            window.currentUtterance.onend = () => {
+                document.getElementById('sys-status').innerText = "JARVIS PROTOCOL: LISTENING (待命)";
+                animationStatus = "LISTENING";
                 particleSystem.material.color.setHex(0x00d2ff);
             };
             
-            window.speechSynthesis.speak(utterance);
+            window.speechSynthesis.speak(window.currentUtterance);
+            
+            // 🌟 杀招四：强效保活心跳
+            if (window.speechSynthesis.paused) {
+                window.speechSynthesis.resume();
+            }
         }
     </script>
 </body>
